@@ -1,0 +1,11 @@
+- job:
+    block-downstream: false
+    block-upstream: false
+    builders: []
+    concurrent: false
+    disabled: false
+    name: !!python/unicode '123'
+    project-type: freestyle
+    publishers: []
+    triggers: []
+    wrappers: []

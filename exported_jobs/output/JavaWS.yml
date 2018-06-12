@@ -1,0 +1,157 @@
+- job:
+    concurrent: true
+    disabled: false
+    dsl: |+
+      // workaround to check out the Jenkinsfile of the tag because parameters are not replaced
+      // when using the "Pipeline script from SCM" option
+      node('linux-master') {
+      stage('Check environment') {
+      //sh 'ls -al'
+      echo "workspace"
+      echo "${env.WORKSPACE}"
+      echo "gitlabBranch"
+      echo "${env.gitlabBranch}"
+      echo "gitlabSourceBranch"
+      echo "${env.gitlabSourceBranch}"
+      echo "gitlabActionType"
+      echo "${env.gitlabActionType}"
+      echo "gitlabUserName"
+      echo "${env.gitlabUserName}"
+      echo "gitlabUserEmail"
+      echo "${env.gitlabUserEmail}"
+      echo "gitlabSourceRepoHomepage"
+      echo "${env.gitlabSourceRepoHomepage}"
+      echo "gitlabSourceRepoName"
+      echo "${env.gitlabSourceRepoName}"
+      echo "gitlabSourceRepoURL"
+      echo "${env.gitlabSourceRepoURL}"
+      echo "gitlabSourceRepoSshUrl"
+      echo "${env.gitlabSourceRepoSshUrl}"
+      echo "gitlabMergeRequestTitle"
+      echo "${env.gitlabMergeRequestTitle}"
+      echo "gitlabMergeRequestDescription"
+      echo "${env.gitlabMergeRequestDescription}"
+      echo "gitlabMergeRequestId"
+      echo "${env.gitlabMergeRequestId}"
+      echo "gitlabMergeRequestState"
+      echo "${env.gitlabMergeRequestState}"
+      echo "gitlabMergedByUser"
+      echo "${env.gitlabMergedByUser}"
+
+      echo "gitlabMergeRequestAssignee"
+      echo "${env.gitlabMergeRequestAssignee}"
+
+      echo "gitlabMergeRequestLastCommit"
+      echo "${env.gitlabMergeRequestLastCommit}"
+
+      echo "gitlabMergeRequestTargetProjectId"
+      echo "${env.gitlabMergeRequestTargetProjectId}"
+
+      echo "gitlabTargetBranch"
+      echo "${env.gitlabTargetBranch}"
+
+      echo "gitlabTargetRepoName"
+      echo "${env.gitlabTargetRepoName}"
+
+      echo "gitlabTargetNamespace"
+      echo "${env.gitlabTargetNamespace}"
+
+
+      echo "gitlabTargetRepoSshUrl"
+      echo "${env.gitlabTargetRepoSshUrl}"
+
+      echo "gitlabBefore"
+      echo "${env.gitlabBefore}"
+
+      echo "gitlabAfter"
+      echo "${env.gitlabAfter}"
+
+      echo "gitlabTriggerPhrase"
+      echo "${env.gitlabTriggerPhrase}"
+
+      if ("${env.gitlabActionType}" == "PUSH") {
+      checkout changelog: true, poll: true, scm: [
+      $class                           : 'GitSCM', branches: [[name: "${env.gitlabAfter}"]],
+      doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [],
+      userRemoteConfigs                : [
+      [credentialsId: '1a199e0b-8b89-45e4-b85a-d400bc95dd0c',
+      url          : 'ssh://git@192.168.122.10:10022/conghm1/JavaWS.git']
+      ]
+      ]
+      sh 'ls -al'
+      sh 'cat Dockerfile'
+      } else if ("${env.gitlabActionType}" == "MERGE") {
+
+      checkout changelog: true, poll: true, scm: [
+      $class                           : 'GitSCM',
+      branches                         : [[name: "origin/${env.gitlabSourceBranch}"]],
+      doGenerateSubmoduleConfigurations: false,
+      extensions                       : [
+      [
+      $class : 'PreBuildMerge',
+      options: [
+      fastForwardMode: 'FF',
+      mergeRemote    : 'origin',
+      mergeStrategy  : 'RESOLVE',
+      mergeTarget    : "${env.gitlabTargetBranch}"
+      ]
+      ],
+      [
+      $class: 'UserIdentity', email: 'conghm1@viettel.com.vn', name: 'conghm1'
+      ]
+
+      ],
+      submoduleCfg                     : [],
+      userRemoteConfigs                : [[credentialsId: 'jenkins_clone_credentials',
+      name         : 'origin',
+      url          : "http://192.168.122.10:10080/conghm1/JavaWS.git"]]
+      ]
+
+
+      sh 'ls -al'
+      sh 'cat Dockerfile'
+      }
+
+      }
+      //load 'Jenkinsfile-test'
+      }
+
+
+    name: !!python/unicode 'JavaWS'
+    parameters:
+    - string:
+        default: http://192.168.122.10:10080/conghm1/JavaWS
+        description: ''
+        name: GITLAB_PROJECT_URL
+        trim: true
+    project-type: pipeline
+    properties:
+    - raw:
+        xml: |
+          <com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty plugin="gitlab-plugin@1.5.3">
+          <gitLabConnection>gitlab1</gitLabConnection>
+          </com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty>
+    sandbox: false
+    triggers:
+    - raw:
+        xml: |
+          <com.dabsquared.gitlabjenkins.GitLabPushTrigger plugin="gitlab-plugin@1.5.3">
+          <spec />
+          <triggerOnPush>false</triggerOnPush>
+          <triggerOnMergeRequest>true</triggerOnMergeRequest>
+          <triggerOnPipelineEvent>false</triggerOnPipelineEvent>
+          <triggerOnAcceptedMergeRequest>false</triggerOnAcceptedMergeRequest>
+          <triggerOnClosedMergeRequest>false</triggerOnClosedMergeRequest>
+          <triggerOnApprovedMergeRequest>true</triggerOnApprovedMergeRequest>
+          <triggerOpenMergeRequestOnPush>both</triggerOpenMergeRequestOnPush>
+          <triggerOnNoteRequest>true</triggerOnNoteRequest>
+          <noteRegex>Jenkins please retry a build</noteRegex>
+          <ciSkip>false</ciSkip>
+          <skipWorkInProgressMergeRequest>false</skipWorkInProgressMergeRequest>
+          <setBuildDescription>true</setBuildDescription>
+          <branchFilterType>All</branchFilterType>
+          <includeBranchesSpec />
+          <excludeBranchesSpec />
+          <targetBranchRegex />
+          <secretToken>{AQAAABAAAAAQuMeqchkWcPzK5rk82x2V/Nvsm+qJ7OJ+zqdFiumyc2o=}</secretToken>
+          </com.dabsquared.gitlabjenkins.GitLabPushTrigger>
