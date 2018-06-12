@@ -7,11 +7,11 @@
 - <https://github.com/openstack-infra/jenkins-job-builder>
 - <https://docs.openstack.org/infra/jenkins-job-builder/>
 
-## Prerequisites
+## 2. Prerequisites
 - A jenkins server and jobs defined before (example: <http://192.168.122.10:8080> )
 - Jenkins user_name and password (example **user_name**: USER, **password**: USER_PASS)
 
-## 2. How to do?
+## 3. How to do?
 - Create a working directory, example ```/home/user/working_dir``` and jump to it
 - Install python virtual environment ```virtualenv venv```
 - Use it: ```. venv/bin/active```
